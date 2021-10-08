@@ -7,26 +7,39 @@ using UnityEngine.ProBuilder;
 public class HandPalmTriggerAction : MonoBehaviour
 {
     [SerializeField] private GameObject _ovrRig;
+    [SerializeField] private GameObject _trolley;
     [SerializeField] private float _smoothing = 1f;
     private Color _defaultButtonColor;
+
+    private Coroutine locomotionCoroutine;
     
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<ButtonTrigger>(out var button))
         {
-            Vector3 targetMove = Vector3.zero;
-            _defaultButtonColor = button.GetComponent<MeshRenderer>().material.color;
+            
             button.GetComponent<MeshRenderer>().material.color = Color.blue;
+            
+            
+            Vector3 ovrTargetMove = Vector3.zero;
+            Vector3 trolleyTargetMove = Vector3.zero;
             if (button.isforward)
             {
-                targetMove = _ovrRig.transform.position + (Vector3.forward * 0.5f);
+                ovrTargetMove = _ovrRig.transform.position + (Vector3.forward * 0.5f);
+                trolleyTargetMove = _trolley.transform.position + (Vector3.forward * 0.5f);
             }
-            else
+            else if (!button.isforward)
             {
-                targetMove = _ovrRig.transform.position - (Vector3.forward * 0.5f);
+                ovrTargetMove = _ovrRig.transform.position - (Vector3.forward * 0.5f);
+                trolleyTargetMove = _trolley.transform.position - (Vector3.forward * 0.5f);
             }
-            StopCoroutine("OvrRigMoveForward");
-            StartCoroutine(nameof(OvrRigMoveForward), targetMove);
+
+            if (locomotionCoroutine != null)
+            {
+                StopCoroutine(locomotionCoroutine);
+            }
+            
+            locomotionCoroutine = StartCoroutine(LocomotionTrolleyOvrRig(ovrTargetMove,trolleyTargetMove));
         }
     }
 
@@ -36,17 +49,20 @@ public class HandPalmTriggerAction : MonoBehaviour
     {
         if (other.TryGetComponent<ButtonTrigger>(out var button))
         {
-            button.GetComponent<MeshRenderer>().material.color  = _defaultButtonColor;
+            button.GetComponent<MeshRenderer>().material.color  = button.defaultColor;
         }
     }
 
-    IEnumerator OvrRigMoveForward(Vector3 targetMove)
+    IEnumerator LocomotionTrolleyOvrRig(Vector3 ovrtargetMove, Vector3 trolleytargetMove)
     {
         
-        while (Vector3.Distance(_ovrRig.transform.position, targetMove) > 0.05f)
+        while (Vector3.Distance(_ovrRig.transform.position, ovrtargetMove) > 0.05f)
         {
             _ovrRig.transform.position =
-                Vector3.Lerp(_ovrRig.transform.position, targetMove, _smoothing * Time.deltaTime);
+                Vector3.Lerp(_ovrRig.transform.position, ovrtargetMove, _smoothing * Time.deltaTime);
+            
+            _trolley.transform.position =
+                Vector3.Lerp(_trolley.transform.position, trolleytargetMove, _smoothing * Time.deltaTime);
 
             yield return null;
         }

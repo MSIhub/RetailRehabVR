@@ -29,7 +29,7 @@ public class ItemRecognition : MonoBehaviour
     {
         if (_itemListUI.listItems.Count != 0) return;
         _costUI.text = "Congratulations!";
-        _itemListUI.GetComponent<TextMeshProUGUI>().fontSize = 10;
+        _itemListUI.GetComponent<TextMeshProUGUI>().fontSize = 8;
         _itemListUI.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
         _itemListUI.GetComponent<TextMeshProUGUI>().text = "Shopping Completed";
     }
@@ -55,7 +55,7 @@ public class ItemRecognition : MonoBehaviour
                     _costRemaining -= item.cost; // decrease the overall cost remaining
                 }
 
-                _costUI.text = "Money left: " + _costRemaining.ToString();
+                _costUI.text = "Money left: € " + _costRemaining.ToString();
 
             }
             
